@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SalstudioZ.Fuzzy — Rekomendasi Suhu &amp; Kelembaban</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
+</head>
+<body>
+
+<!-- ══ NAVBAR ══ -->
+<nav class="navbar">
+  <div class="container nav-inner">
+    <a class="nav-brand" href="/">
+      <div class="nav-brand-icon">
+        <img src="{{ url_for('static', filename='kulkas.png') }}" alt="Kulkas"/>
+      </div>
+      <div class="nav-brand-text">
+        <span class="nav-brand-name">SalstudioZ<span>.Fuzzy</span></span>
+        <span class="nav-brand-sub">Logika Fuzzy Mamdani</span>
+      </div>
+    </a>
+    <div class="nav-divider"></div>
+    <div class="nav-spacer"></div>
+    <a class="nav-link-ext" href="http://localhost:5002" target="_blank">
+      <img src="{{ url_for('static', filename='kulkas.png') }}" alt="Kulkas"/>
+      <span>SalstudioZ.Pakar</span>
+    </a>
+  </div>
+</nav>
+
+<!-- ══ HERO ══ -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-row">
+      <div class="hero-left">
+        <div class="hero-eyebrow">Fuzzy Mamdani</div>
+        <h1 class="hero-title">Rekomendasi <span>Suhu</span> &amp;<br/>Kelembaban Ideal</h1>
+        <p class="hero-desc">Masukkan jenis bahan, durasi penyimpanan, dan kondisi ruangan. Sistem akan menghitung suhu dan kelembaban optimal menggunakan 28 aturan fuzzy dengan defuzzifikasi centroid.</p>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-card">
+          <div class="stat-icon-wrap ice">
+            <img src="{{ url_for('static', filename='kulkas.png') }}" alt="Kulkas"/>
+          </div>
+          <div class="stat-info">
+            <span class="stat-num">28</span>
+            <span class="stat-lbl">Aturan Fuzzy</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon-wrap dew"><i class="fa-solid fa-sliders"></i></div>
+          <div class="stat-info">
+            <span class="stat-num">3</span>
+            <span class="stat-lbl">Variabel Input</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon-wrap amber"><i class="fa-solid fa-chart-bar"></i></div>
+          <div class="stat-info">
+            <span class="stat-num">2</span>
+            <span class="stat-lbl">Variabel Output</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ PAGE BODY ══ -->
+<div class="page-body">
+<div class="container">
+<div class="main-grid">
+
+  <!-- ── INPUT PANEL ── -->
+  <div class="panel panel-sticky">
+    <div class="panel-head">
+      <div class="panel-head-icon"><i class="fa-solid fa-sliders"></i></div>
+      <h2>Parameter Input</h2>
+    </div>
+    <div class="panel-body">
+
+      <!-- Jenis Bahan -->
+      <div class="field">
+        <label class="field-label" for="jenis_bahan">
+          <i class="fa-solid fa-box-open"></i> Jenis Bahan
+        </label>
+        <div class="select-wrap">
+          <select id="jenis_bahan" class="input-select">
+            {% for j in jenis_list %}
+            <option value="{{ j }}">{{ j.replace('_',' ').title() }}</option>
+            {% endfor %}
+          </select>
+          <i class="fa-solid fa-chevron-down select-arrow"></i>
+        </div>
+        <p class="field-hint">Pilih kategori bahan yang akan disimpan dalam kulkas atau dry cabinet.</p>
+      </div>
+
+      <!-- Lama Simpan -->
+      <div class="field">
+        <label class="field-label">
+          <i class="fa-solid fa-calendar-days"></i> Lama Penyimpanan
+          <span class="slider-badge" id="lama-badge">7 hari</span>
+        </label>
+        <div class="slider-row">
+          <span class="slider-edge">1</span>
+          <div class="slider-track">
+            <input type="range" id="lama_simpan" class="range-input" min="1" max="14" step="1" value="7"/>
+            <div class="slider-fill" id="lama-fill"></div>
+            <div class="range-tip" id="lama-tip">7</div>
+          </div>
+          <span class="slider-edge">14</span>
+        </div>
+        <div class="slider-ticks">
+          <span>Sangat Singkat</span><span>Singkat</span><span>Sedang</span><span>Panjang</span>
+        </div>
+      </div>
+
+      <!-- Kelembaban Ruangan -->
+      <div class="field">
+        <label class="field-label">
+          <i class="fa-solid fa-droplet"></i> Kelembaban Ruangan
+          <span class="slider-badge" id="rh-badge">50%</span>
+          <span class="badge-optional">Opsional</span>
+        </label>
+        <div class="slider-row">
+          <span class="slider-edge">30%</span>
+          <div class="slider-track">
+            <input type="range" id="kelembaban_ruangan" class="range-input" min="30" max="80" step="1" value="50"/>
+            <div class="slider-fill" id="rh-fill"></div>
+            <div class="range-tip" id="rh-tip">50</div>
+          </div>
+          <span class="slider-edge">80%</span>
+        </div>
+        <div class="slider-ticks">
+          <span>Kering</span><span style="text-align:center">Normal</span><span style="text-align:right">Lembab</span>
+        </div>
+      </div>
+
+      <button id="btn-calc" class="btn-calc" onclick="doCalc()">
+        <i class="fa-solid fa-calculator"></i>
+        <span id="btn-text">Hitung Rekomendasi</span>
+        <i class="fa-solid fa-spinner fa-spin btn-spin" id="btn-spin"></i>
+      </button>
+
+      <div class="err-box" id="err-box">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span id="err-text"></span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── RESULTS COLUMN ── -->
+  <div class="results-col" id="results-col">
+
+    <!-- Placeholder -->
+    <div class="results-empty" id="results-empty">
+      <div class="results-empty-icon">
+        <img src="{{ url_for('static', filename='kulkas.png') }}" alt="Kulkas"/>
+      </div>
+      <h3>Hasil akan muncul di sini</h3>
+      <p>Isi parameter di sebelah kiri lalu klik "Hitung Rekomendasi" untuk mendapatkan suhu dan kelembaban optimal.</p>
+    </div>
+
+    <!-- Result Cards (hidden initially) -->
+    <div id="result-cards-wrap" style="display:none; flex-direction:column; gap:1.25rem;">
+
+      <div class="result-cards-row">
+        <!-- Suhu -->
+        <div class="res-card res-card--ice animate-in">
+          <div class="res-card-label">Suhu Ideal</div>
+          <i class="fa-solid fa-temperature-three-quarters res-icon"></i>
+          <div class="res-value" id="res-suhu">--</div>
+          <div class="res-unit">derajat Celsius</div>
+          <div class="res-badge" id="res-suhu-label">--</div>
+          <div class="res-desc">Suhu penyimpanan direkomendasikan</div>
+        </div>
+        <!-- Kelembaban -->
+        <div class="res-card res-card--dew animate-in" style="animation-delay:0.08s">
+          <div class="res-card-label">Kelembaban Ideal</div>
+          <i class="fa-solid fa-droplet res-icon"></i>
+          <div class="res-value" id="res-rh">--</div>
+          <div class="res-unit">persen RH</div>
+          <div class="res-badge" id="res-rh-label">--</div>
+          <div class="res-desc">Kelembaban relatif direkomendasikan</div>
+        </div>
+      </div>
+
+      <!-- Detail Fuzzy Sets -->
+      <div class="detail-panel animate-in" style="animation-delay:0.14s">
+        <div class="detail-head">
+          <i class="fa-solid fa-wave-square"></i>
+          <h3>Detail Kekuatan Himpunan Fuzzy</h3>
+        </div>
+        <div class="detail-body">
+          <div class="detail-col">
+            <div class="detail-col-title">
+              <i class="fa-solid fa-temperature-low"></i> Himpunan Suhu
+            </div>
+            <div id="suhu-bars"></div>
+          </div>
+          <div class="detail-col">
+            <div class="detail-col-title">
+              <i class="fa-solid fa-droplet"></i> Himpunan Kelembaban
+            </div>
+            <div id="rh-bars"></div>
+          </div>
+        </div>
+      </div>
+
+      <p class="footnote">
+        <i class="fa-solid fa-circle-info"></i>
+        Hasil dihitung menggunakan metode Mamdani — implikasi MIN, agregasi MAX, defuzzifikasi centroid numerik (step 0.1°C / 0.5% RH).
+      </p>
+
+    </div>
+
+  </div><!-- /results-col -->
+
+</div><!-- /main-grid -->
+</div><!-- /container -->
+</div><!-- /page-body -->
+
+<!-- ══ FOOTER ══ -->
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <img src="{{ url_for('static', filename='kulkas.png') }}" alt="Kulkas"/>
+      <span>SalstudioZ</span>.Fuzzy
+    </div>
+    <div class="footer-right">
+      <span>Responsi 1 Praktikum KB</span>
+      <div class="footer-dot"></div>
+      <div class="footer-dot"></div>
+      <a href="http://localhost:5002" target="_blank">SalstudioZ.Pakar</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ── Slider Init ── */
+function initSlider(inputId, badgeId, fillId, tipId, suffix) {
+  const input = document.getElementById(inputId);
+  const badge = document.getElementById(badgeId);
+  const fill  = document.getElementById(fillId);
+  const tip   = document.getElementById(tipId);
+  const min = parseFloat(input.min), max = parseFloat(input.max);
+
+  function sync() {
+    const val = parseFloat(input.value);
+    const pct = (val - min) / (max - min) * 100;
+    badge.textContent   = val + suffix;
+    fill.style.width    = pct + '%';
+    tip.textContent     = val;
+    tip.style.left      = `calc(${pct}% - 16px)`;
+  }
+  input.addEventListener('input', sync);
+  sync();
+}
+
+initSlider('lama_simpan',        'lama-badge', 'lama-fill', 'lama-tip', ' hari');
+initSlider('kelembaban_ruangan', 'rh-badge',   'rh-fill',   'rh-tip',   '%');
+
+/* ── Calculate ── */
+async function doCalc() {
+  const btn  = document.getElementById('btn-calc');
+  const spin = document.getElementById('btn-spin');
+  const txt  = document.getElementById('btn-text');
+  const err  = document.getElementById('err-box');
+  const errT = document.getElementById('err-text');
+
+  btn.disabled = true;
+  spin.style.display = 'inline-block';
+  txt.textContent = 'Menghitung…';
+  err.style.display = 'none';
+
+  const payload = {
+    jenis_bahan:        document.getElementById('jenis_bahan').value,
+    lama_simpan:        parseFloat(document.getElementById('lama_simpan').value),
+    kelembaban_ruangan: parseFloat(document.getElementById('kelembaban_ruangan').value),
+  };
+
+  try {
+    const res  = await fetch('/calculate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      errT.textContent  = data.error || 'Terjadi kesalahan.';
+      err.style.display = 'flex';
+      return;
+    }
+
+    showResults(data);
+
+  } catch (e) {
+    errT.textContent  = 'Gagal terhubung ke server.';
+    err.style.display = 'flex';
+  } finally {
+    btn.disabled = false;
+    spin.style.display = 'none';
+    txt.textContent = 'Hitung Rekomendasi';
+  }
+}
+
+function showResults(data) {
+  document.getElementById('results-empty').style.display = 'none';
+
+  const wrap = document.getElementById('result-cards-wrap');
+  wrap.style.display = 'flex';
+
+  document.getElementById('res-suhu').textContent       = data.suhu;
+  document.getElementById('res-rh').textContent         = data.rh;
+  document.getElementById('res-suhu-label').textContent = data.suhu_label;
+  document.getElementById('res-rh-label').textContent   = data.rh_label;
+
+  renderBars('suhu-bars', data.suhu_set);
+  renderBars('rh-bars',   data.rh_set);
+
+  wrap.querySelectorAll('.animate-in').forEach((el, i) => {
+    el.style.animation = 'none';
+    el.offsetHeight;
+    el.style.animationDelay = (i * 0.08) + 's';
+    el.style.animation = '';
+  });
+
+  wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderBars(containerId, setObj) {
+  const c = document.getElementById(containerId);
+  c.innerHTML = '';
+  Object.entries(setObj).forEach(([lbl, val]) => {
+    const pct = Math.round(val * 100);
+    c.innerHTML += `
+      <div class="bar-item">
+        <span class="bar-name">${lbl.replace(/_/g,' ')}</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+        <span class="bar-pct">${pct}%</span>
+      </div>`;
+  });
+}
+</script>
+</body>
+</html>
